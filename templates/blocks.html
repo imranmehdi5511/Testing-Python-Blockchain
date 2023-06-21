@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Blockchain Blocks</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ccc;
+        }
+
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+
+        tr:hover {
+            background-color: #e0e0e0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Blockchain Blocks</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Index</th>
+                <th>Previous Hash</th>
+                <th>Timestamp</th>
+                <th>Data</th>
+                <th>Current Hash</th>
+                <th>Status</th>
+                <th>Proposed On</th>
+                <th>Transactions</th>
+                <th>Proposed By</th>
+                <th>Fee Recipient</th>
+                <th>Block Reward</th>
+                <th>Difficulty</th>
+                <th>Size</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for block in blocks %}
+            <tr>
+                <td>{{ block.index }}</td>
+                <td>{{ block.previous_hash }}</td>
+                <td>{{ block.timestamp }}</td>
+                <td>{{ block.data }}</td>
+                <td>{{ block.current_hash }}</td>
+                <td>{{ block.status }}</td>
+                <td>{{ block.proposed_on }}</td>
+                <td>{{ block.transactions }}</td>
+                <td>{{ block.proposed_by }}</td>
+                <td>{{ block.fee_recipient }}</td>
+                <td>{{ block.block_reward }}</td>
+                <td>{{ block.difficulty }}</td>
+                <td>{{ block.size }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>
