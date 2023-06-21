@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Blockchain Explorer</title>
+</head>
+<body>
+    <h1>Blockchain Explorer</h1>
+    <h2>All Blocks</h2>
+    <div id="blockchain"></div>
+    
+    <script>
+        // Fetch all blocks from the server
+        fetch('/blocks')
+            .then(response => response.json())
+            .then(data => {
+                const blockchainDiv = document.getElementById('blockchain');
+                // Iterate through each block and display the details
+                data.forEach(block => {
+                    const blockDiv = document.createElement('div');
+                    blockDiv.innerHTML = `
+                        <h3>Block ${block.index}</h3>
+                        <p>Timestamp: ${block.timestamp}</p>
+                        <p>Previous Hash: ${block.previous_hash}</p>
+                        <p>Hash: ${block.hash}</p>
+                        <hr>
+                    `;
+                    blockchainDiv.appendChild(blockDiv);
+                });
+            })
+            .catch(error => console.error('Error:', error));
+    </script>
+</body>
+</html>
