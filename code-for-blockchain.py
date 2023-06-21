@@ -12,6 +12,7 @@ import multiprocessing
 import shutil
 import flask
 html_data = None
+from threading import Thread
 
 class Block:
     def __init__(self, index, previous_hash, timestamp, data, current_hash,
@@ -30,7 +31,7 @@ class Block:
         self.block_reward = block_reward
         self.difficulty = difficulty
         self.size = size
-
+        #self.name = name
     def compute_hash(self):
         block_string = json.dumps(self.__dict__, sort_keys=True)
         return hashlib.sha256(block_string.encode()).hexdigest()
@@ -190,7 +191,6 @@ app = Flask(__name__)
 blockchain, endpoints = initialize_blockchain()
 
 
-
 @app.route('/add_block', methods=['POST'])
 def add_block():
     try:
@@ -265,73 +265,6 @@ def get_block(index):
         return jsonify(block.__dict__)
     else:
         return jsonify({'error': 'Block not found'})
-        
-app = flask.Flask('my_app')
-@app.route('/sync_blocks', methods=['POST'])
-
-def sync_blocks(node):
-    response = requests.get(f"http://{node}/sync_blocks")
-    if response.status_code == 200:
-        received_blocks = json.loads(response.content)
-        for block_data in received_blocks:
-            block = Block(
-                index=block_data['index'],
-                previous_hash=block_data['previous_hash'],
-                timestamp=block_data['timestamp'],
-                data=block_data['data'],
-                current_hash=block_data['current_hash'],
-                status=block_data['status'],
-                proposed_on=block_data['proposed_on'],
-                transactions=block_data['transactions'],
-                proposed_by=block_data['proposed_by'],
-                fee_recipient=block_data['fee_recipient'],
-                block_reward=block_data['block_reward'],
-                difficulty=block_data['difficulty'],
-                size=block_data['size'],
-                name=block_data['name']
-            )
-            blockchain.add_block(block)
-    else:
-        # The other chain is not online
-        time.sleep(10)
-        sync_blocks(node)
-
-
-        # Send the block to the other chain
-        #requests.post(f"http://{node}/sync_blocks", json=block.to_dict())
-
-
-@app.route("/sync_blocks")
-def sync_blocks_endpoint():
-    response = requests.get(f"http://{node}/sync_blocks")
-    received_blocks = json.loads(response.content)
-    for block_data in received_blocks:
-        block = Block(
-            index=block_data['index'],
-            previous_hash=block_data['previous_hash'],
-            timestamp=block_data['timestamp'],
-            data=block_data['data'],
-            current_hash=block_data['current_hash'],
-            status=block_data['status'],
-            proposed_on=block_data['proposed_on'],
-            transactions=block_data['transactions'],
-            proposed_by=block_data['proposed_by'],
-            fee_recipient=block_data['fee_recipient'],
-            block_reward=block_data['block_reward'],
-            difficulty=block_data['difficulty'],
-            size=block_data['size'],
-            name=block_data['name']
-        )
-        blockchain.add_block(block)
-
-        # Send the block to the other chain
-        requests.post(f"http://{node}/sync_blocks", json=block.to_dict())
-
-    return jsonify({'message': 'Blocks synchronized successfully'}), 200
-
-
-
-
 def get_time_diff(start_time, end_time):
     start = datetime.strptime(start_time, "%Y-%m-%d %H:%M:%S.%f")
     end = datetime.strptime(end_time, "%Y-%m-%d %H:%M:%S.%f")
@@ -346,15 +279,221 @@ def get_time_diff(start_time, end_time):
 def get_block_size(data):
     return len(data)
 
-def main():
-    time.sleep(10)
-    nodes = ["127.0.0.1:5005", "127.0.0.1:5006"]
-    other_chain = "http://localhost:5005"
-    for node in nodes:
-        sync_blocks(node)
+#app = flask.Flask('my_app')
+#@app.route('/sync_blocks', methods=['POST'])
+#def sync_blocks(node):
+#    response = requests.get(f"http://{node}/sync_blocks")
+#    if response.status_code == 200:
+#        received_blocks = json.loads(response.content)
+#        for block_data in received_blocks:
+#            block = Block(
+#                index=block_data['index'],
+#                previous_hash=block_data['previous_hash'],
+#                timestamp=block_data['timestamp'],
+#                data=block_data['data'],
+#                current_hash=block_data['current_hash'],
+#                status=block_data['status'],
+#                proposed_on=block_data['proposed_on'],
+#                transactions=block_data['transactions'],
+#                proposed_by=block_data['proposed_by'],
+#                fee_recipient=block_data['fee_recipient'],
+#                block_reward=block_data['block_reward'],
+#                difficulty=block_data['difficulty'],
+#                size=block_data['size'],
+#                name=block_data['name']
+#            )
+#            blockchain.add_block(block)
+#    else:
+#        # The other chain is not online
+#        time.sleep(10)
+#        sync_blocks(node)
 
-if __name__ == '__main__':
-    main()
-    app.run(host='127.0.0.1', port=5006)
 
+
+        # Send the block to the other chain
+        #requests.post(f"http://{node}/sync_blocks", json=block.to_dict())
+
+
+#@app.route("/sync_blocks")
+#def sync_blocks_endpoint():
+#    received_blocks = request.get_json()
+#    for block_data in received_blocks:
+#        block = Block(
+#            index=block_data['index'],
+#            previous_hash=block_data['previous_hash'],
+#            timestamp=block_data['timestamp'],
+#            data=block_data['data'],
+#            current_hash=block_data['current_hash'],
+#            status=block_data['status'],
+#            proposed_on=block_data['proposed_on'],
+#            transactions=block_data['transactions'],
+#            proposed_by=block_data['proposed_by'],
+#            fee_recipient=block_data['fee_recipient'],
+#            block_reward=block_data['block_reward'],
+#            difficulty=block_data['difficulty'],
+#            size=block_data['size'],
+#            name=block_data['name']
+#        )
+#        blockchain.add_block(block)
+#
+#        # Send the block to the other chain
+#        requests.post(f"http://{node}/sync_blocks", json=block.to_dict())
+#
+#    return jsonify({'message': 'Blocks synchronized successfully'}), 200
+#
+#
+#
+#def main():
+#    time.sleep(10)
+#    nodes = ["172.16.21.102:5000", "172.16.21.73:5000"]
+#    other_chain = "http://172.16.21.73:5000"
+#    for node in nodes:
+#        sync_blocks(node)
+#
+#
+#
+#def get_nodes_from_file():
+#    with open('peers.txt', 'r') as file:
+#        nodes = file.read().splitlines()
+#    return nodes
+#def store_block(block):
+#    #The following command will create a 'blocks' directory if it does not exist already
+#    if not os.path.exists('blocks'):
+#        os.makedirs('blocks')
+#    
+#    #Generate a unique filename for the block
+#    filename = f"block_{block.index}.json"
+#    
+#    #Save the block to a file in the 'blocks' directory
+#    with open(os.path.join('blocks', filename), 'w') as file:
+#        json.dump(block.__dict__, file)
+#
+#def get_nodes_from_file():
+#    with open('peers.txt', 'r') as file:
+#        nodes = file.read()
+#
+#    if len(nodes) == 1:
+#        return nodes
+#
+#    return nodes.splitlines()
+#def get_nodes_from_file():
+#    with open('peers.txt', 'r') as file:
+#        nodes = []
+#
+#        for line in file:
+#            nodes.append(line)#
+#
+#        if len(nodes) == 1:
+#            return nodes[0]
+#
+#        return nodes
+#def get_nodes_from_file():
+#    with open('peers.txt', 'r') as file:
+#        nodes = file.read().splitlines()
+#
+#        print('The nodes are:', nodes)
+#
+#        return nodes
+def get_nodes_from_file():
+    with open('peers.txt', 'r') as file:
+        nodes = file.read().splitlines()
+
+        nodes = [node.strip() for node in nodes]
+        print('The nodes are:', nodes)
+        return nodes
+
+
+
+def extract_blocks(data):
+    blocks = []
+    current_block = ""
+    block_started = False
+
+    for char in data:
+        if char == '{':
+            block_started = True
+            current_block += char
+        elif char == '}':
+            current_block += char
+            blocks.append(current_block)
+            current_block = ""
+            block_started = False
+        elif block_started:
+            current_block += char
+
+    return blocks
+
+def store_block(block, index):
+    # The following command will create a 'blocks' directory if it does not exist already
+    if not os.path.exists('blocks'):
+        os.makedirs('blocks')
+    
+    # Generate a unique filename for the block
+    filename = f"block_{index}.json"
+    
+    # Save the block to a file in the 'blocks' directory
+    with open(os.path.join('blocks', filename), 'w') as file:
+        file.write(block)
+
+    
+#def sync_blocks():
+#    while True:
+#        # Check for blocks to copy from other nodes.
+#        nodes = get_nodes_from_file()
+#        #nodes.remove(f"http://172.16.21.102:5000") #Remove your own node from the peers.txt list
+#        for node in nodes:
+#            response = requests.get(f"{node}/blocks")
+#            if response.status_code == 200:
+#                received_blocks = json.loads(response.content)
+#                for block_data in received_blocks:
+#                    block = Block(
+#                        index=block_data['index'],
+#                        previous_hash=block_data['previous_hash'],
+#                        timestamp=block_data['timestamp'],
+#                        data=block_data['data'],
+#                        current_hash=block_data['current_hash'],
+#                        status=block_data['status'],
+#                        proposed_on=block_data['proposed_on'],
+#                        transactions=block_data['transactions'],
+#                        proposed_by=block_data['proposed_by'],
+#                        fee_recipient=block_data['fee_recipient'],
+#                        block_reward=block_data['block_reward'],
+#                        difficulty=block_data['difficulty'],
+#                        size=block_data['size'],
+#                        name=block_data['name']
+#                    )
+#                    blockchain.add_block(block)
+#                    store_block(block) #Store a copy of blocks
+#                    
+#                    for other_node in nodes:
+#                        if other_node != node:  # Exclude the node from which the block was received
+#                            requests.post(f"{other_node}/receive_block", json=block.__dict__)
+#
+#        time.sleep(10)
+def sync_blocks():
+    while True:
+        # Check for blocks to copy from other nodes.
+        nodes = get_nodes_from_file()
+        for node in nodes:
+            response = requests.get(f"{node}/blocks")
+            if response.status_code == 200:
+                received_data = response.content.decode('utf-8')
+                blocks = extract_blocks(received_data)
+                for i, block in enumerate(blocks):
+                    store_block(block, i)  # Store a copy of blocks
+                    
+                    #for other_node in nodes:
+                        #if other_node != node:  # Exclude the node from which the block was received
+                            #requests.post(f"{other_node}/receive_block", data=block)
+
+        time.sleep(10)
+if __name__ == "__main__":
+    # Start a new thread for sync_blocks()
+    sync_thread = Thread(target=sync_blocks)
+    sync_thread.start()
+#    main()
+    # Run the Flask app
+    nodes = get_nodes_from_file()
+
+    app.run(host='172.16.21.102', port=5000)
 
