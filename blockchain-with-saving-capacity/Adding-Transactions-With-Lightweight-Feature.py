@@ -5,8 +5,9 @@ def add_transactions(text_file, block_size):
     with open(text_file, "r") as f:
         lines = f.readlines()
 
-    for block_number, i in enumerate(range(0, len(lines), block_size), start=1):
-        block_transactions = [line.rstrip("\n") for line in lines[i:i + block_size]]
+    current_index = 0
+    while current_index < len(lines):
+        block_transactions = [line.rstrip("\n") for line in lines[current_index:current_index + block_size]]
         transaction_data = " <br> ".join(block_transactions)
         transactions = [{
             "sender": "0x0",
@@ -24,9 +25,14 @@ def add_transactions(text_file, block_size):
                 print(f"Error adding transaction. Status code: {response.status_code}, Response: {response.text}")
 
         # Mine a new block for each batch of transactions
-        print(f"Mining Block {block_number}")
-        requests.get("http://172.16.21.157:5000/mine")
+        #print(f"Mining Block {current_index // block_size + 1}")
+        #requests.get("http://172.16.21.157:5000/mine")
 
+        # Wait for user input
+        input("Press Enter to add the next batch of transactions...")
+
+        current_index += block_size
+        print("Current_index: {current_index}")
 if __name__ == "__main__":
     text_file = "/home/imran/Benchmark-Stream/mega_text_file.txt"
     block_size = 100000
