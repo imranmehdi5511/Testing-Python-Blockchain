@@ -17,24 +17,39 @@ html_data = None
 from threading import Thread
 import requests
 from flask import Flask, jsonify, request
-from argparse import ArgumentParser
 BLOCKCHAIN_FILE = "blockchain_data.json"
-
 class Block:
-    def __init__(self, index, previous_hash, timestamp, data, current_hash, status, proposed_on, transactions, proposed_by, fee_recipient, block_reward, difficulty, size):
+    def __init__(self, index, previous_hash, timestamp, transactions, current_hash, proof):
         self.index = index
-        self.previous_hash = previous_hash
         self.timestamp = timestamp
-        self.data = data
+        self.proof = proof
+        self.previous_hash = previous_hash
         self.current_hash = current_hash
-        self.status = status
-        self.proposed_on = proposed_on
-        self.transactions = transactions
-        self.proposed_by = proposed_by
-        self.fee_recipient = fee_recipient
-        self.block_reward = block_reward
-        self.difficulty = difficulty
-        self.size = size
+        self.transactions = transactions  # Change 'data' to 'transactions'
+
+    def to_dict(self):
+        """
+        Convert the Block object to a dictionary
+        """
+        return {
+            "index": self.index,
+            "timestamp": self.timestamp,
+            "proof": self.proof,
+            "previous_hash": self.previous_hash,
+            "current_hash": self.current_hash,
+            "transactions": self.transactions,  # Change 'data' to 'transactions'
+        }
+
+    @staticmethod
+    def from_dict(dict_block):
+        return Block(
+            dict_block.get("index", 0),
+            dict_block.get("previous_hash", ""),
+            dict_block.get("timestamp", ""),
+            dict_block.get("transactions", ""),  # Change 'data' to 'transactions'
+            dict_block.get("current_hash", ""),
+            dict_block.get("proof", ""),  # Provide a default value for the 'proof' key
+        )
 
 class Blockchain:
     def __init__(self):
@@ -125,7 +140,8 @@ class Blockchain:
                 chain = response.json()['chain']
 
                 # Check if the length is longer and the chain is valid
-                if length > max_length and self.valid_chain(chain):
+                if length > len(self.chain) and self.valid_chain(chain):
+                #if length > max_length and self.valid_chain(chain):
                     max_length = length
                     new_chain = chain
 
@@ -137,7 +153,6 @@ class Blockchain:
             return True
 
         return False
-
 
     def new_transaction(self, sender, recipient, amount, data):
         """
@@ -228,7 +243,8 @@ class Blockchain:
             self.new_block(timestamp=time.time(), previous_hash='1', proof=100)
             self.save_blockchain()
 
-#---
+
+#-----
     def save_blockchain(self):
         data = {
             "chain": self.chain,
@@ -237,7 +253,6 @@ class Blockchain:
         with open(BLOCKCHAIN_FILE, "w") as f:
             json.dump(data, f)
 
-    # ... (existing code)
 
     def new_block(self, proof, previous_hash, timestamp):
         """
@@ -256,13 +271,15 @@ class Blockchain:
             'previous_hash': previous_hash or self.hash(self.chain[-1]),
         }
 
-        # Reset the current list of transactions
-        self.current_transactions = []
+        # Check if the blockchain has been resolved after a graceful restart
+        if len(self.chain) > 0:
+            # Only add the block if the index is greater than the index of the last block in the blockchain
+            if block['index'] > len(self.chain):
+                self.current_transactions = []
+                self.chain.append(block)
+                self.save_blockchain()  # Save the updated blockchain to the file
 
-        self.chain.append(block)
-        self.save_blockchain()  # Save the updated blockchain to the file
         return block
-
 def calculate_hash(index, previous_hash, timestamp, data):
     block_string = f"{index}{previous_hash}{timestamp}{data}"
     return hashlib.sha256(block_string.encode()).hexdigest()
@@ -272,7 +289,7 @@ app = Flask(__name__)
 blockchain = Blockchain()
 
 # Generate a globally unique address for this node
-node_identifier = "http://localhost:5000"
+node_identifier = "http://localhost:5001"
 
 # Register the initial node
 blockchain.register_node(node_identifier)
@@ -425,6 +442,7 @@ def get_block_by_index(index):
     else:
         return "Block not found", 404
 
+
 @app.route('/exit', methods=['POST'])
 def graceful_exit():
     # Save the blockchain data before exiting
@@ -443,7 +461,7 @@ def restart():
     # Save the blockchain data before restarting
     blockchain.save_blockchain()
     # Perform any other cleanup or restart tasks here
-    
+    # ...
 
     # Restart the application gracefully
     shutdown = request.environ.get('werkzeug.server.shutdown')
@@ -453,21 +471,20 @@ def restart():
     # Start the application again in a new process
     new_process = multiprocessing.Process(target=start_app, args=())
     new_process.start()
+    # Resolve conflicts after restart
+    blockchain.resolve_conflicts()
 
     return 'Restarting blockchain node gracefully...', 200
 def start_app():
     # Start the app again on the same port
     app.run(debug=True, host='localhost', port=5001)
 
-
 if __name__ == '__main__':
     from argparse import ArgumentParser
 
     parser = ArgumentParser()
-    parser.add_argument('-p', '--port', default=5000, type=int, help='port to listen on')
+    parser.add_argument('-p', '--port', default=5001, type=int, help='port to listen on')
     args = parser.parse_args()
     port = args.port
 
-    app.run(debug='True', host='localhost', port=5000)
-
-
+    app.run(debug='True', host='localhost', port=5001)
