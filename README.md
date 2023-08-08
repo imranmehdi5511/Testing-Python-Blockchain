@@ -1,6 +1,6 @@
 !!!!!!!!!!!!!!!!!!!WARNING!!!!!!!!!!!!!!!!!!! \n
-This chain is still under constructions
-First install python 3.11
+This chain is still under construction. \n
+First install python 3.11\n
 then:
 ```
 python3.11 -m venv env
