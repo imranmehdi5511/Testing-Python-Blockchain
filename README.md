@@ -1,9 +1,6 @@
 !!!!!!!!!!!!!!!!!!!WARNING!!!!!!!!!!!!!!!!!!!   
-
 This chain is still under construction.   
-
 First install python 3.11   
-
 then:
 ```
 python3.11 -m venv env
