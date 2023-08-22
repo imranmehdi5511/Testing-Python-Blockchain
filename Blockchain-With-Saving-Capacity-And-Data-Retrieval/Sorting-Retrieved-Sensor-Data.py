@@ -30,10 +30,11 @@ def sort_data(file_path, sensor_names):
 
     with open(file_path, 'r') as f:
         for line in f:
-            match = re.match(r'^(.*?):', line)
-            if match:
-                sensor_name = match.group(1)
-                sensor_data[sensor_name].append(line)
+            if not line.startswith('Data in Block'):
+                match = re.match(r'^(.*?):', line)
+                if match:
+                    sensor_name = match.group(1)
+                    sensor_data[sensor_name].append(line)
 
     for sensor_name, data in sensor_data.items():
         data.sort()  # Sort the data for each sensor
@@ -42,6 +43,6 @@ def sort_data(file_path, sensor_names):
             f.writelines(data)
 
 if __name__ == "__main__":
-    input_file_path = 'mega_text_file.txt'
+    input_file_path = 'data_output.txt'
     sensor_names = detect_sensor_names(input_file_path)
     sort_data(input_file_path, sensor_names)
