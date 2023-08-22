@@ -19,6 +19,7 @@ import requests
 from flask import Flask, jsonify, request
 BLOCKCHAIN_FILE = "blockchain_data.json"
 #Replace all instances of localhost with your IP Address[IP Address of the Node], and put your desired port number instead of port number 5000
+#Remove the Mining Capability for blockchain to Act as Lightweight
 class Block:
     def __init__(self, index, previous_hash, timestamp, transactions, current_hash, proof):
         self.index = index
