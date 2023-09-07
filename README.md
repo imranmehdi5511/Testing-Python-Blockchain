@@ -17,3 +17,6 @@ http://<Your IP>:<Your Port>/<Your endpoint where blocks are stored>
 http://192.168.12.56:5000/blocks
 ```
 Note this IP is only a place holder.
+
+Important Note:
+`blocks` folder needs to be created.
