@@ -19,4 +19,4 @@ http://192.168.12.56:5000/blocks
 Note this IP is only a place holder.
 
 Important Note:
-`blocks` folder needs to be created.
+`blocks` folder needs to be created, before starting the chain.
