@@ -140,7 +140,7 @@ class Blockchain:
 
         return block
 
-
+#This Function is used to register new node to the network
     def register_node(self, address):
         """
         Add a new node to the list of nodes
@@ -156,7 +156,7 @@ class Blockchain:
             self.nodes.add(parsed_url.path)
         else:
             raise ValueError('Invalid URL')
-
+#This function checks whether the chain is Valid
     def valid_chain(self, chain):
         """
         Determine if a given blockchain is valid
@@ -178,7 +178,7 @@ class Blockchain:
             current_index += 1
 
         return True
-
+#Resolve conflicts
     def resolve_conflicts(self):
         neighbours = self.nodes
         new_chain = None
@@ -212,7 +212,7 @@ class Blockchain:
 
         return False
     
-
+#This is the backbone function which adds transactions. These transactions are coming PLC. In the demo case python scirpts were used to generate simulated sensor Data.
     def new_transaction(self, sender, recipient, amount, data):
         """
         Creates a new transaction to go into the next mined Block
@@ -234,14 +234,14 @@ class Blockchain:
         })
 
         return self.last_block['index'] + 1
-
+#Function to get last block in the chain
     @property
     def last_block(self):
         if self.chain:
             return self.chain[-1]
         else:
             return None
-
+#Hash Function
     def hash(self, proof, previous_hash, timestamp, block):
         """
         Calculates the hash of the block.
@@ -258,7 +258,7 @@ class Blockchain:
         block_string = f"{proof}{previous_hash}{timestamp}{json.dumps(block, sort_keys=True, default=str)}"
         return hashlib.sha256(block_string.encode()).hexdigest()
 
-
+#Proof of Work Calculations
     def proof_of_work(self, last_block):
         """
         Simple Proof of Work Algorithm:
@@ -281,7 +281,7 @@ class Blockchain:
 
         return proof
 
-
+#Valid Proof
     @staticmethod
     def valid_proof(last_proof, proof, last_hash):
         """
@@ -297,7 +297,8 @@ class Blockchain:
         guess = f'{last_proof}{proof}{last_hash}'.encode()
         guess_hash = hashlib.sha256(guess).hexdigest()
         return guess_hash[:4] == "0000"
-
+#Load Blockchain Function to load the chain when the code restarts
+#In industrial case normally the server shouldn't be down, but the function has been added here just in case.
     def load_blockchain(self):
         if os.path.exists(BLOCKCHAIN_FILE) and os.path.getsize(BLOCKCHAIN_FILE) > 0:
             try:
