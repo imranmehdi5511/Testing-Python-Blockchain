@@ -1,3 +1,4 @@
+#First of all, All of the the required modules are imported. These Modules are needed for smooth functioning of the code.
 from urllib.parse import urlparse
 from uuid import uuid4
 from flask import Flask
@@ -13,11 +14,14 @@ import requests
 import multiprocessing
 import shutil
 import flask
-html_data = None
 from threading import Thread
 import requests
 from flask import Flask, jsonify, request
+#This is declared at the start of the code so that these can be used as Global Variables
+html_data = None
+#The blockchain file which will contain the chain ledger stored in it. If the file is deleted the chain is reset.
 BLOCKCHAIN_FILE = "blockchain_data.json"
+#Block Class Declarations
 class Block:
     def __init__(self, index, previous_hash, timestamp, transactions, current_hash, proof):
         self.index = index
@@ -38,6 +42,7 @@ class Block:
             "current_hash": self.current_hash,
             "transactions": self.transactions,  # Change 'data' to 'transactions'
         }
+#The Reason You see two different hash functions in the code is half the needed values use one, and the other use the other one, if one is used, error is obtained. Hence there is a function with name hash, and another with name hash1.
     @staticmethod
     def hash1(block):
         """
@@ -83,8 +88,9 @@ class Block:
             dict_block.get("proof", ""),  # Provide a default value for the 'proof' key
         )
 
-
+#Blockchain Class Declarations and Functions
 class Blockchain:
+#First Blockchain is initialized
     def __init__(self):
         self.current_transactions = []
         self.chain = []
