@@ -105,26 +105,26 @@ class Blockchain:
             # Load the blockchain from file
             self.load_blockchain()
 
-
+#The new Block function is defined in blockchain class. This function is invoked in mine flask app in order to add blocks to the network.
     def new_block(self, proof, previous_hash, timestamp, current_hash):
         """
         Create a new block in the blockchain.
 
         Args:
-            proof: The proof of work for the block.
-            timestamp: The timestamp for the block.
-            current_hash: The hash of the current block.
+            proof: The proof of work for the block. It will calculate the proof of work of the entire block including the transactions. Note that the transactions are basically sensor data values coming from PLC.
+            timestamp: The timestamp for the block, is the time at which the block is generated. The timestamp cannot be modified as it is calculated using the current time, data year etc.
+            current_hash: The hash of the current block. It includes previous hash, and all other fields present inside the block. This way it connects the block to the previous block.
 
         Returns:
-            The new block.
+            The new block. This function when called returns the newly created block.
         """
         previous_block = self.chain[-1] if self.chain else None
         previous_hash = previous_block['current_hash'] if previous_block else None
 
         block = {
-            'index': len(self.chain) + 1,
-            'timestamp': str(timestamp),
-            'transactions': self.current_transactions,
+            'index': len(self.chain) + 1,#Index of new block is 1 more than the index of the last block, hence the code checks the length of the chain and adds one to it
+            'timestamp': str(timestamp), #The timestamp value is generated and converted into a string
+            'transactions': self.current_transactions,#All the transactions which are currently present in the transactions pool are added to the mined block. The resultant block is then added to the chain.
             'proof': proof,
             'previous_hash': previous_hash,
             'current_hash': current_hash,
