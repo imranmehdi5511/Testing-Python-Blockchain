@@ -33,7 +33,7 @@ def add_transactions(text_file, block_size):
 
         # Wait for user input
         #input("Press Enter to add the next batch of transactions...")
-
+        #By commenting this what happens is all the lines in text file are added to single block and the code to send transactions exits when the lines or sensor values to send are finished
         current_index += block_size
         print("Current_index: {current_index}")
 if __name__ == "__main__":
