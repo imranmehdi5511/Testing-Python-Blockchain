@@ -59,11 +59,11 @@ class Block:
         return hashlib.sha256(block_string).hexdigest()
 
         json_serializable = ['index', 'timestamp', 'transactions', 'proof', 'previous_hash']
+#Second Hash Function
     @staticmethod
     def hash(proof, previous_hash,timestamp, block):
         """
         Calculates the hash of the block.
-    
         Args:
             proof: The proof of work for the block.
             previous_hash: The hash of the previous block.
@@ -316,7 +316,7 @@ class Blockchain:
 
             #self.chain.append(genesis_block)
             self.save_blockchain()
-
+#Hash function for block
     @staticmethod
     def hash1(block):
         """
@@ -338,11 +338,11 @@ class Blockchain:
             json.dump(data, f,default=str)
 
 
-
+#Method to get hash
 def calculate_hash(index, previous_hash, timestamp, data):
     block_string = f"{index}{previous_hash}{timestamp}{data}"
     return hashlib.sha256(block_string.encode()).hexdigest()
-# Instantiate the Node
+# Instantiate the Node and app
 app = Flask(__name__)
 app = Flask(__name__)
 blockchain = Blockchain()
@@ -352,7 +352,7 @@ node_identifier = "http://localhost:5001"
 
 # Register the initial node
 blockchain.register_node(node_identifier)
-
+#Mine function of the flask app, which is invoked in order to mine new blocks, if transactions are present in the transaction pool they will be added to the block, other wise the data field is set as empty
 @app.route('/mine', methods=['GET'])
 def mine():
     # Get the last block in the chain
@@ -403,10 +403,10 @@ def mine():
     filename = f'blocks/block_response.json'
     with open(filename, 'a') as f:
         json.dump(response, f)
-
+#This is also printed in the terminal window, and is also used to update the ledger
     return jsonify(response), 200
 
-
+#This is the function in the flask app in order to add new transactions to the blockchain. The lightweight nodes which do not have ability to mine blocks can also directly invoke this function in order to add transactions to the transaction pool of the Blockchain. Then the Full Node runs the mine function as per it's pleasing in order to add blocks to the network.
 @app.route('/transactions/new', methods=['POST'])
 def new_transaction():
     values = request.get_json()
@@ -421,6 +421,7 @@ def new_transaction():
 
     response = {'message': f'Transaction will be added to Block {index}'}
     return jsonify(response), 201
+#This function is invoked in order to get the entire current chain
 @app.route('/chain', methods=['GET'])
 def full_chain():
     response = {
@@ -428,6 +429,7 @@ def full_chain():
         'length': len(blockchain.chain),    
     }
     return jsonify(response), 200
+#This Function is invoked inorder to register new nodes to the network when the network starts. The members of the chain have to register each other, but chain history remains intact
 @app.route('/nodes/register', methods=['POST'])
 def register_nodes():
     values = request.get_json()
@@ -444,6 +446,7 @@ def register_nodes():
         'total_nodes': list(blockchain.nodes),
     }
     return jsonify(response), 201
+#By invoking this function, we will get list of current nodes registered on the node
 @app.route('/nodes', methods=['GET'])
 def get_nodes():
     nodes = list(blockchain.nodes)
@@ -451,6 +454,7 @@ def get_nodes():
         'nodes': nodes
     }
     return jsonify(response), 200
+#It is used to sync the chains between nodes, if another node mines a block and becomes longer, the present chain is replaced. It is important to sync the chain after every mined block in case of many full nodes,but this can be avoided by using one of the full nodes for mining.
 @app.route('/nodes/resolve', methods=['GET'])
 def consensus():
     replaced = blockchain.resolve_conflicts()
@@ -467,7 +471,7 @@ def consensus():
         }
 
     return jsonify(response), 200
-
+#It is used to get blocks 
 @app.route('/get_blocks', methods=['GET'])
 def get_blocks():
     response = {
@@ -475,7 +479,7 @@ def get_blocks():
         'length': len(blockchain.chain),
     }
     return jsonify(response), 200
-
+#Get by index
 @app.route('/get_blocks/<int:index>', methods=['GET'])
 def get_block_by_index(index):
     block = blockchain.get_block_by_index(index)
@@ -483,6 +487,7 @@ def get_block_by_index(index):
         return jsonify(block), 200
     else:
         return "Block not found", 404
+#This is used for graceful shutdown of the chain
 @app.route('/exit', methods=['POST'])
 def graceful_exit():
     # Save the blockchain data before exiting
@@ -496,6 +501,7 @@ def graceful_exit():
         shutdown()
 
     return 'Exiting blockchain node gracefully...', 200
+#This is used to restart the chain
 @app.route('/restart', methods=['POST'])
 def restart():
     # Save the blockchain data before restarting
@@ -518,6 +524,7 @@ def restart():
 def start_app():
     # Start the app again on the same port
     app.run(debug=True, host='localhost', port=5001)
+#Get Data
 @app.route('/get_data', methods=['GET'])
 def get_data():
     data_blocks = []
@@ -529,7 +536,7 @@ def get_data():
         'data_blocks': data_blocks
     }
     return jsonify(response), 200
-
+#Running the App
 if __name__ == '__main__':
     from argparse import ArgumentParser
 
