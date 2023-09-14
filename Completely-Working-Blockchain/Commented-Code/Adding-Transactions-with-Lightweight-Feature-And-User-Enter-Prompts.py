@@ -18,7 +18,7 @@ def add_transactions(text_file, block_size):
             "amount": 0,
             "data": transaction_data
         }]
-
+#You can change the url to the url of your server
         # Send the transactions to the server
         url = "http://172.16.21.157:5000/transactions/new"
         headers = {'Content-Type': 'application/json'}
@@ -37,6 +37,9 @@ def add_transactions(text_file, block_size):
         current_index += block_size
         print("Current_index: {current_index}")
 if __name__ == "__main__":
+#Replace the path to file with the path to your text file. 
     text_file = "/home/imran/Benchmark-Stream/mega_text_file.txt"
+#Number of lines you want to be sent each time as part of transaction, to the transaction pool
     block_size = 100000
+#Transaction added
     add_transactions(text_file, block_size)
