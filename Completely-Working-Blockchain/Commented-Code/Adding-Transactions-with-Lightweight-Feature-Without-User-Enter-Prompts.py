@@ -32,7 +32,7 @@ def add_transactions(text_file, block_size):
         #requests.get("http://172.16.21.157:5000/mine")
 
         # Wait for user input
-        input("Press Enter to add the next batch of transactions...")
+        #input("Press Enter to add the next batch of transactions...")
 
         current_index += block_size
         print("Current_index: {current_index}")
